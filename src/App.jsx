@@ -34,7 +34,7 @@ export default function App() {
   const handleRun = useCallback(async (liveUrl, stagedUrl) => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/compare-urls", {
+      const res = await fetch("https://visualdiffer-6.onrender.com/compare-urls", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ liveUrl, stagedUrl }),
