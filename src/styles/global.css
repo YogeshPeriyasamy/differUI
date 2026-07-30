@@ -897,3 +897,271 @@ body {
     max-height: 120px;
   }
 }
+
+/* ── Site selector ── */
+.site-selector-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.site-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 2px solid #e4e7ed;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13.5px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  color: #4a5568;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
+}
+
+.site-btn:hover {
+  border-color: #c0c8d4;
+}
+
+.site-btn-active {
+  border-color: #c0392b;
+  color: #c0392b;
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1);
+}
+
+.site-btn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ── Page checkbox list ── */
+.page-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.page-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1.5px solid #e4e7ed;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #fff;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.page-checkbox-item:hover {
+  border-color: #c0c8d4;
+  background: #fafbfc;
+}
+
+.page-checkbox-item-checked {
+  border-color: #c0392b;
+  background: rgba(192, 57, 43, 0.04);
+}
+
+.page-checkbox-input {
+  width: 16px;
+  height: 16px;
+  accent-color: #c0392b;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.page-checkbox-label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #1a1a2e;
+  flex: 1;
+}
+
+.page-checkbox-tick {
+  font-size: 12px;
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.page-sel-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.text-action-btn {
+  background: none;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #c0392b;
+  cursor: pointer;
+  padding: 0 2px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.text-action-btn:hover {
+  text-decoration: underline;
+}
+
+.text-action-sep {
+  color: #b8c0cc;
+  font-size: 11px;
+}
+
+.page-sel-summary {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #8892a4;
+}
+
+/* ── Run meta bar ── */
+.run-meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #fafbfc;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.run-meta-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8892a4;
+}
+
+.run-meta-id {
+  font-size: 11.5px;
+  font-family: monospace;
+  color: #1a1a2e;
+  background: #f0f2f5;
+  padding: 3px 8px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.run-meta-count {
+  font-size: 12px;
+  color: #8892a4;
+  margin-left: auto;
+}
+
+/* ── Page tabs (multi-page results) ── */
+.page-tab-bar {
+  display: flex;
+  gap: 0;
+  border: 1px solid #e4e7ed;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: #fafbfc;
+  overflow: hidden;
+}
+
+.page-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  color: #8892a4;
+  background: transparent;
+  border: none;
+  border-right: 1px solid #e4e7ed;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.page-tab-btn:last-child {
+  border-right: none;
+}
+
+.page-tab-btn:hover {
+  color: #1a1a2e;
+  background: #f0f2f5;
+}
+
+.page-tab-btn-active {
+  color: #c0392b;
+  background: #fff;
+  border-bottom: 2px solid #c0392b;
+}
+
+.page-tab-count {
+  font-size: 10.5px;
+  font-weight: 600;
+  background: #e4e7ed;
+  color: #4a5568;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.page-tab-btn-active .page-tab-count {
+  background: rgba(192, 57, 43, 0.12);
+  color: #c0392b;
+}
+
+/* ── Section stats pills ── */
+.result-section-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.stat-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.stat-pill-green {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.stat-pill-amber {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.stat-pill-grey {
+  background: #f0f2f5;
+  color: #4a5568;
+}
+
+/* ── Responsive adjustments for new components ── */
+@media (max-width: 680px) {
+  .site-selector-grid {
+    flex-direction: column;
+  }
+
+  .run-meta-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .run-meta-count {
+    margin-left: 0;
+  }
+
+  .page-tab-bar {
+    overflow-x: auto;
+  }
+}

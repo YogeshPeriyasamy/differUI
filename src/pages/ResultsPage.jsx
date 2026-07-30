@@ -1,47 +1,11 @@
-import React from "react";
-import { jsPDF } from "jspdf";
+import React, { useState } from "react";
+
+const API_BASE = "http://localhost:4000";
 
 export default function ResultsPage({ result, onGoCompare }) {
-  const downloadDiffPDF = async () => {
-    const imageUrl = `https://visualdiffer-6.onrender.com${result.diffUrl}`;
+  const [activePageIdx, setActivePageIdx] = useState(0);
 
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-
-    img.onload = () => {
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-
-      const imgRatio = img.width / img.height;
-      const pageRatio = pageWidth / pageHeight;
-
-      let imgWidth;
-      let imgHeight;
-
-      if (imgRatio > pageRatio) {
-        // Image is wider
-        imgWidth = pageWidth;
-        imgHeight = pageWidth / imgRatio;
-      } else {
-        // Image is taller
-        imgHeight = pageHeight;
-        imgWidth = pageHeight * imgRatio;
-      }
-
-      pdf.addImage(img, "PNG", (pageWidth - imgWidth) / 2, 0, imgWidth, imgHeight);
-
-      pdf.save("diff-result.pdf");
-    };
-
-    img.src = imageUrl;
-  };
-
+  // ── Empty state ──────────────────────────────────────────────────────────
   if (!result) {
     return (
       <div className="fade-in">
@@ -50,21 +14,7 @@ export default function ResultsPage({ result, onGoCompare }) {
             <div className="empty-icon">◫</div>
             <div className="empty-text">No results yet</div>
             <div className="empty-sub">Run a comparison first to see the diff here</div>
-            <button
-              onClick={onGoCompare}
-              style={{
-                marginTop: 8,
-                padding: "9px 20px",
-                background: "#c0392b",
-                color: "#fff",
-                border: "none",
-                borderRadius: 7,
-                fontSize: 13,
-                fontWeight: 500,
-                fontFamily: "'DM Sans', sans-serif",
-                cursor: "pointer",
-              }}
-            >
+            <button className="run-btn" style={{ marginTop: 8 }} onClick={onGoCompare}>
               Go to Compare →
             </button>
           </div>
@@ -73,63 +23,111 @@ export default function ResultsPage({ result, onGoCompare }) {
     );
   }
 
+  const { runId, results = [] } = result;
+  const activePage = results[activePageIdx] ?? null;
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  function imgUrl(relUrl) {
+    return `${API_BASE}${relUrl}`;
+  }
+
+  // ── Layout ───────────────────────────────────────────────────────────────
   return (
     <div className="fade-in">
-      <div className="result-card">
-        {/* Header */}
-        <div className="result-header">
-          <div className="result-header-left">
-            <div className="result-title">Diff Result</div>
-            <div className="result-urls">
-              <span style={{ color: "#d97706" }}>●</span>
-              <span>{result.staging}</span>
-              <span style={{ color: "#b8c0cc" }}>vs</span>
-              <span style={{ color: "#16a34a" }}>●</span>
-              <span>{result.live}</span>
-            </div>
-          </div>
-          <button
-            onClick={downloadDiffPDF}
-            style={{
-              padding: "8px 16px",
-              background: "#2563eb",
-              color: "#fff",
-              border: "none",
-              borderRadius: 7,
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif",
-            }}
-          >
-            Download PDF ↓
-          </button>
-        </div>
 
-        <div className="diff-side-grid">
-          <div className="diff-col">
-            <div className="diff-col-header">
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#d97706", display: "inline-block" }} />
-              Staging
-            </div>
-            <img src={`https://visualdiffer-6.onrender.com${result.stagingUrl}`} className="diff-img" alt="Staging screenshot" />
-          </div>
-          <div className="diff-col">
-            <div className="diff-col-header">
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#c0392b", display: "inline-block" }} />
-              Diff
-            </div>
-            <img src={`https://visualdiffer-6.onrender.com${result.diffUrl}`} className="diff-img" alt="Diff screenshot" />
-          </div>
-          <div className="diff-col">
-            <div className="diff-col-header">
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", display: "inline-block" }} />
-              Live / Production
-            </div>
-            <img src={`https://visualdiffer-6.onrender.com${result.liveUrl}`} className="diff-img" alt="Live screenshot" />
-          </div>
+      {/* Run meta bar */}
+      <div className="run-meta-bar">
+        <div className="run-meta-label">Run ID</div>
+        <code className="run-meta-id">{runId}</code>
+        <div className="run-meta-count">
+          {results.length} page{results.length !== 1 ? "s" : ""} compared
         </div>
       </div>
+
+      {/* Page tabs (if more than one page) */}
+      {results.length > 1 && (
+        <div className="page-tab-bar">
+          {results.map((r, i) => (
+            <button
+              key={r.page}
+              className={`page-tab-btn${activePageIdx === i ? " page-tab-btn-active" : ""}`}
+              onClick={() => setActivePageIdx(i)}
+            >
+              {r.page}
+              <span className="page-tab-count">
+                {r.sectionCount.matched}/{r.sectionCount.defined}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {activePage && (
+        <div className="result-card" style={{ marginTop: results.length > 1 ? 0 : 0, borderTopLeftRadius: results.length > 1 ? 0 : undefined }}>
+
+          {/* Header */}
+          <div className="result-header">
+            <div className="result-header-left">
+              <div className="result-title">{activePage.page}</div>
+              <div className="result-section-stats">
+                <span className="stat-pill stat-pill-green">
+                  {activePage.sectionCount.matched} matched
+                </span>
+                {activePage.sectionCount.missingInStaging > 0 && (
+                  <span className="stat-pill stat-pill-amber">
+                    {activePage.sectionCount.missingInStaging} missing in staging
+                  </span>
+                )}
+                <span className="stat-pill stat-pill-grey">
+                  {activePage.sectionCount.defined} defined
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3-column diff view */}
+          <div className="diff-side-grid">
+            <div className="diff-col">
+              <div className="diff-col-header">
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", display: "inline-block" }} />
+                Live
+              </div>
+              <img
+                src={imgUrl(activePage.liveUrl)}
+                className="diff-img"
+                alt="Live screenshot"
+                loading="lazy"
+              />
+            </div>
+
+            <div className="diff-col">
+              <div className="diff-col-header">
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#c0392b", display: "inline-block" }} />
+                Diff
+              </div>
+              <img
+                src={imgUrl(activePage.diffUrl)}
+                className="diff-img"
+                alt="Diff screenshot"
+                loading="lazy"
+              />
+            </div>
+
+            <div className="diff-col">
+              <div className="diff-col-header">
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#d97706", display: "inline-block" }} />
+                Staging
+              </div>
+              <img
+                src={imgUrl(activePage.stagingUrl)}
+                className="diff-img"
+                alt="Staging screenshot"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
