@@ -3,7 +3,7 @@ import { jsPDF } from "jspdf";
 
 export default function ResultsPage({ result, onGoCompare }) {
   const downloadDiffPDF = async () => {
-    const imageUrl = `https://visualdiffer-6.onrender.com${result.diffUrl}`;
+    const imageUrl = `http://localhost:4000${result.diffUrl}`;
 
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -112,21 +112,21 @@ export default function ResultsPage({ result, onGoCompare }) {
               <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#d97706", display: "inline-block" }} />
               Staging
             </div>
-            <img src={`https://visualdiffer-6.onrender.com${result.stagingUrl}`} className="diff-img" alt="Staging screenshot" />
+            <img src={`http://localhost:4000${result.stagingUrl}`} className="diff-img" alt="Staging screenshot" />
           </div>
           <div className="diff-col">
             <div className="diff-col-header">
               <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#c0392b", display: "inline-block" }} />
               Diff
             </div>
-            <img src={`https://visualdiffer-6.onrender.com${result.diffUrl}`} className="diff-img" alt="Diff screenshot" />
+            <img src={`http://localhost:4000${result.diffUrl}`} className="diff-img" alt="Diff screenshot" />
           </div>
           <div className="diff-col">
             <div className="diff-col-header">
               <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", display: "inline-block" }} />
               Live / Production
             </div>
-            <img src={`https://visualdiffer-6.onrender.com${result.liveUrl}`} className="diff-img" alt="Live screenshot" />
+            <img src={`http://localhost:4000${result.liveUrl}`} className="diff-img" alt="Live screenshot" />
           </div>
         </div>
       </div>
