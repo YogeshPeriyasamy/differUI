@@ -215,7 +215,7 @@ body {
 .compare-sub {
   font-size: 13px;
   color: #8892a4;
-  margin-bottom: 28px;
+  margin-bottom: 8px;
 }
 
 .field-group {
@@ -484,6 +484,26 @@ body {
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
   z-index: 49;
+}
+
+.urlHolder {
+  display: flex;  
+  flex-direction: column;
+  gap: 10px;
+}
+
+.urlHolder input {
+  width: 100%;
+  padding: 8px 14px;
+  border: 1.5px solid #e4e7ed;
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: #1a1a2e;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+ 
 }
 
 /* ── Responsive: Tablet (≤ 900px) ── */
@@ -1164,4 +1184,499 @@ body {
   .page-tab-bar {
     overflow-x: auto;
   }
+}
+
+/* ── PDF Download Button ── */
+.pdf-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+
+.pdf-download-btn:hover:not(:disabled) {
+  background: #a93226;
+  box-shadow: 0 2px 8px rgba(192, 57, 43, 0.35);
+}
+
+.pdf-download-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.pdf-download-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.pdf-btn-spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* URL validation error message                                                 */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.url-error-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 9px 12px;
+  margin-bottom: 16px;
+  line-height: 1.45;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Fetch Pages button                                                           */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.fetch-pages-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  background: #1e2330;
+  color: #ffffff;
+  border: none;
+  border-radius: 7px;
+  font-size: 13.5px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  margin-bottom: 14px;
+}
+
+.fetch-pages-btn:hover:not(:disabled) {
+  background: #2a3040;
+}
+
+.fetch-pages-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Site key confirmation badge                                                  */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.site-key-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #15803d;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+}
+
+.site-key-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16a34a;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Page checkbox path hint                                                      */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.page-checkbox-path {
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: monospace;
+  margin-left: auto;
+  margin-right: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Mini spinner (inside buttons)                                                */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.btn-mini-spinner {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.btn-mini-spinner-white {
+  border-color: rgba(255,255,255,0.35);
+  border-top-color: #fff;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Run meta bar — enriched with date / time                                     */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.run-meta-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  background: #ffffff;
+  border: 1px solid #e4e7ed;
+  border-radius: 10px 10px 0 0;
+  padding: 12px 20px;
+  border-bottom: none;
+  font-size: 12.5px;
+}
+
+.run-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.run-meta-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #8892a4;
+}
+
+.run-meta-id {
+  font-family: monospace;
+  font-size: 12px;
+  color: #4a5568;
+  background: #f1f5f9;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.run-meta-value {
+  font-size: 12.5px;
+  color: #1a1a2e;
+  font-weight: 500;
+}
+
+.run-meta-count {
+  font-size: 12.5px;
+  color: #4a5568;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Page tab bar — mismatch % pill inside tabs                                   */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.page-tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  border-top: none;
+  border-bottom: none;
+  padding: 10px 16px 0;
+}
+
+.page-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #8892a4;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.page-tab-btn:hover {
+  color: #1a1a2e;
+}
+
+.page-tab-btn-active {
+  color: #c0392b;
+  border-bottom-color: #c0392b;
+}
+
+.page-tab-count {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.page-tab-mismatch {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Result header — URL pair rows + right-side mismatch badge                   */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.result-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e4e7ed;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.result-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.result-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.result-url-pair {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  min-width: 0;
+}
+
+.result-url-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.result-url-tag-live {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.result-url-tag-staging {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.result-url-link {
+  font-family: monospace;
+  font-size: 11.5px;
+  color: #4a5568;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 380px;
+}
+
+.result-url-link:hover {
+  color: #c0392b;
+  text-decoration: underline;
+}
+
+.result-section-stats {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Mismatch percentage badge                                                    */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.mismatch-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  min-width: 72px;
+}
+
+.mismatch-badge-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.mismatch-badge-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0.75;
+  margin-top: 1px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* PDF button                                                                   */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.pdf-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #f8fafc;
+  border: 1.5px solid #dde3ec;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  color: #4a5568;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.pdf-download-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+.pdf-download-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pdf-btn-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #dde3ec;
+  border-top-color: #c0392b;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Stat pills                                                                   */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.stat-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+.stat-pill-green  { background: #dcfce7; color: #15803d; }
+.stat-pill-amber  { background: #fef3c7; color: #b45309; }
+.stat-pill-grey   { background: #f1f5f9; color: #64748b; }
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Page checkbox list (shared styles referenced by ComparePage)                 */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.page-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1.5px solid #e4e7ed;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.page-checkbox-item:hover {
+  border-color: #c0392b;
+  background: #fff5f5;
+}
+
+.page-checkbox-item-checked {
+  border-color: #c0392b;
+  background: #fff5f5;
+}
+
+.page-checkbox-input {
+  accent-color: #c0392b;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.page-checkbox-label {
+  font-size: 13.5px;
+  color: #1a1a2e;
+  flex: 1;
+}
+
+.page-checkbox-tick {
+  font-size: 12px;
+  color: #c0392b;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.page-sel-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.text-action-btn {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: #c0392b;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.text-action-btn:hover { text-decoration: underline; }
+
+.text-action-sep {
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+.page-sel-summary {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 8px;
 }
