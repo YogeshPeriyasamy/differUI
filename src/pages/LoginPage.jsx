@@ -81,7 +81,7 @@ export default function LoginPage({ onLogin }) {
           <label style={labelStyle}>Email</label>
           <input 
             style={inputStyle}
-            placeholder="poorvik.km@medtrixhealthcare.com"
+            placeholder="admin@medtrix.com"
             value={email} onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === "Enter" && submit()} 
           />

@@ -1,14 +1,25 @@
 import React, { useState } from "react";
 import { jsPDF } from "jspdf";
+import { API_BASE } from "../constants/api";
 
-const API_BASE = "http://localhost:4000";
+function resolveImageUrl(url) {
+  if (!url) return url;
+  if (/^https?:\/\//i.test(url) || url.startsWith("data:") || url.startsWith("blob:")) {
+    return url;
+  }
+  if (url.startsWith("/")) {
+    return `${API_BASE}${url}`;
+  }
+  return `${API_BASE}/${url.replace(/^\.?\//, "")}`;
+}
 
 // ---------------------------------------------------------------------------
 // Image helpers
 // ---------------------------------------------------------------------------
 async function fetchImageAsDataUrl(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to fetch image: ${url}`);
+  const resolvedUrl = resolveImageUrl(url);
+  const res = await fetch(resolvedUrl);
+  if (!res.ok) throw new Error(`Failed to fetch image: ${resolvedUrl}`);
   const blob = await res.blob();
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -24,62 +35,226 @@ async function fetchImageAsDataUrl(url) {
   });
 }
 
-async function downloadPagePdf(pageName, liveUrl, diffUrl, stagingUrl) {
+async function downloadPagePdf(activePage, runId, runDate, runTime) {
+  const pageName = activePage.page;
+  const liveUrl = activePage.liveUrl;
+  const diffUrl = activePage.diffUrl;
+  const stagingUrl = activePage.stagingUrl;
+
+  const livePageUrl = activePage.livePageUrl;
+  const stagingPageUrl = activePage.stagingPageUrl;
+
+  const mismatch = activePage.avgMismatchPct ?? 0;
+
   const entries = [
-    { label: "Live",    url: liveUrl,    color: [22, 163, 74]  },
-    { label: "Diff",    url: diffUrl,    color: [192, 57, 43]  },
-    { label: "Staging", url: stagingUrl, color: [217, 119, 6]  },
+    {
+      label: "Live",
+      url: liveUrl,
+      color: [65,65,65],
+    },
+    {
+      label: "Difference",
+      url: diffUrl,
+      color: [255,0,0],
+    },
+    {
+      label: "Staging",
+      url: stagingUrl,
+      color: [65,65,65],
+    },
   ];
 
-  const reports = [{text:`Validation report for ${pageName}`, fontSize: 14, fontStyle: 'bold', }];
+  // --------------------------------------------------
+  // Report information
+  // --------------------------------------------------
 
-  const images = await Promise.all(entries.map((e) => fetchImageAsDataUrl(e.url)));
+  const reports = [
+    {
+      text: `Validation report for "${pageName}" page`,
+      fontSize: 14,
+      fontStyle: "bold",
+      fontColor: "#000000",
+    },
+    {
+      text: `Comparison : ${livePageUrl} (vs) ${stagingPageUrl}`,
+      fontSize: 12,
+      fontStyle: "normal",
+      fontColor: "#333333",
+    },
+    {
+      text: `Run ID: ${runId}`,
+      fontSize: 10,
+      fontStyle: "normal",
+      fontColor: "#333333",
+    },
+    {
+      text: `Run: ${runDate} : ${runTime}`,
+      fontSize: 10,
+      fontStyle: "normal",
+      fontColor: "#333333",
+    },
+  ];
 
-  const MARGIN_PT  = 16;
-  const TITLE_H    = 22;
-  const LABEL_H    = 14;
-  const LABEL_FONT = 9;
-  const COL_GAP    = 8;
-  const PAGE_W     = 841;
-  const PAGE_H     = 595;
+  // --------------------------------------------------
+  // Fetch images
+  // --------------------------------------------------
 
-  const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+  // const images = await Promise.all(entries.map((entry) => fetchImageAsDataUrl(entry.url)));
+  const images = await Promise.all(
+  entries.map(async (entry) => {
+    try {    
+      const result = await fetchImageAsDataUrl(entry.url);
+      // console.log(`Loaded ${entry.label} successfully`);
+      return result;
+    } catch (error) {
+      console.error(`FAILED: ${entry.label}`);
+      console.error("Error:", error);
+      throw error;
+    }
+  })
+);
 
+  // --------------------------------------------------
+  // PDF setup
+  // --------------------------------------------------
+
+  const margin = 10;
+  const labelHeight = 14;
+  const labelFontSize = 9;
+  const colGap = 2;
+
+  const x = 10;
+  let y = 10;
+
+  const pdf = new jsPDF({
+    orientation: "landscape",
+    unit: "px",
+    format: "a4",
+  });
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+
+  // --------------------------------------------------
+  // Draw report information
+  // --------------------------------------------------
+
+  for (const rep of reports) {
+    const hex = rep.fontColor.replace("#", "");
+
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    pdf.setFont("helvetica", rep.fontStyle);
+    pdf.setFontSize(rep.fontSize);
+    pdf.setTextColor(r, g, b);
+    pdf.text(rep.text, x, y);
+
+    // Move down for next line
+    y += rep.fontSize + 2;
+  }
+
+  // --------------------------------------------------
+  // Mismatch badge
+  // --------------------------------------------------
+
+  let mismatchColor;
+
+  if (mismatch <= 5) {
+    // Green: 0% - 5%
+    mismatchColor = [34, 197, 94];
+  } else if (mismatch <= 10) {
+    // Orange: >5% - 10%
+    mismatchColor = [249, 115, 22];
+  } else {
+    // Red: >10%
+    mismatchColor = [239, 68, 68];
+  }
+
+  const badgeWidth = 80;
+  const badgeHeight = 18;
+
+  const badgeX = pageWidth - margin - badgeWidth;
+  const badgeY = y;
+
+  // Badge background
+  pdf.setFillColor(...mismatchColor);
+
+  pdf.roundedRect(badgeX, badgeY, badgeWidth, badgeHeight, 5, 5, "F");
+
+  // Badge text
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(11);
-  pdf.setTextColor(26, 26, 46);
-  pdf.text(pageName, MARGIN_PT, MARGIN_PT + 10);
+  pdf.setFontSize(10);
+  pdf.setTextColor(255, 255, 255);
 
-  const totalGap   = COL_GAP * 2;
-  const colWidth   = (PAGE_W - MARGIN_PT * 2 - totalGap) / 3;
-  const imgAreaTop = MARGIN_PT + TITLE_H + LABEL_H;
-  const imgAreaH   = PAGE_H - imgAreaTop - MARGIN_PT;
+  pdf.text(`Mismatch: ${mismatch}%`, badgeX + badgeWidth / 2, badgeY+12 , {
+    align: "center",
+  });
+
+  // Move below mismatch badge
+  y = badgeY + badgeHeight + 4;
+
+  // --------------------------------------------------
+  // Calculate image columns
+  // --------------------------------------------------
+
+  const labelY = y;
+  const totalGap = colGap * 2;
+  const colWidth = (pageWidth - margin * 2 - totalGap) / 3;
+  const imgAreaTop = labelY + labelHeight;
+  const imgAreaH = pageHeight - imgAreaTop - margin;
+
+  // --------------------------------------------------
+  // Draw Live / Diff / Staging
+  // --------------------------------------------------
 
   for (let i = 0; i < entries.length; i++) {
-    const { label, color }           = entries[i];
-    const { dataUrl, width, height } = images[i];
-    const colX = MARGIN_PT + i * (colWidth + COL_GAP);
+    const { label, color } = entries[i];
 
-    pdf.setFillColor(...color);
-    pdf.roundedRect(colX, MARGIN_PT + TITLE_H, colWidth, LABEL_H, 2, 2, "F");
+    const { dataUrl, width, height } = images[i];
+
+    const colX = margin + i * (colWidth + colGap);
+
+    // pdf.roundedRect(colX, labelY, colWidth, labelHeight, 2, 2, "F");
 
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(LABEL_FONT);
-    pdf.setTextColor(255, 255, 255);
-    pdf.text(label, colX + colWidth / 2, MARGIN_PT + TITLE_H + LABEL_H - 3.5, { align: "center" });
+    pdf.setFontSize(labelFontSize);
+    pdf.setTextColor(...color);
 
-    const scaleW = colWidth / width;
-    const scaleH = imgAreaH / height;
-    const scale  = Math.min(scaleW, scaleH);
-    const drawW  = width  * scale;
-    const drawH  = height * scale;
+    pdf.text(label, colX , labelY + labelHeight - 3.5, {
+      align: "left",
+    });
+
+    // ----------------------------------------------
+    // Image scaling
+    // ----------------------------------------------
+
+    const scaleW = colWidth / Math.max(width, 1);
+    const scaleH = imgAreaH / Math.max(height, 1);
+    const scale = Math.min(scaleW, scaleH, 1);
+
+    const drawW = width * scale;
+    const drawH = height * scale;
+
+    // Keep the image in its own column and avoid cropping.
     const offsetX = colX + (colWidth - drawW) / 2;
 
+    // ----------------------------------------------
+    // Add image
+    // ----------------------------------------------
+
     const fmt = dataUrl.startsWith("data:image/png") ? "PNG" : "JPEG";
+
     pdf.addImage(dataUrl, fmt, offsetX, imgAreaTop, drawW, drawH);
   }
 
+  // --------------------------------------------------
+  // Save PDF
+  // --------------------------------------------------
+
   const safeFileName = pageName.replace(/[^a-z0-9_-]/gi, "_").toLowerCase();
+
   pdf.save(`diff_${safeFileName}.pdf`);
 }
 
@@ -87,20 +262,20 @@ async function downloadPagePdf(pageName, liveUrl, diffUrl, stagingUrl) {
 // Mismatch badge colour — green < 5 %, amber < 20 %, red ≥ 20 %
 // ---------------------------------------------------------------------------
 function mismatchColor(pct) {
-  if (pct < 5)  return { bg: "#dcfce7", color: "#15803d" };
+  if (pct < 5) return { bg: "#dcfce7", color: "#15803d" };
   if (pct < 20) return { bg: "#fef3c7", color: "#b45309" };
-  return           { bg: "#fee2e2", color: "#b91c1c" };
+  return { bg: "#fee2e2", color: "#b91c1c" };
 }
 
 // ---------------------------------------------------------------------------
 export default function ResultsPage({ result, onGoCompare }) {
   console.log("ResultsPage render", { result });
-  
+
   const [activePageIdx, setActivePageIdx] = useState(0);
-  const [downloading,   setDownloading]   = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   function imgUrl(relUrl) {
-    return `${API_BASE}${relUrl}`;
+    return resolveImageUrl(relUrl);
   }
 
   const { runId, runDate, runTime, results = [] } = result ?? {};
@@ -110,12 +285,7 @@ export default function ResultsPage({ result, onGoCompare }) {
     if (!activePage || downloading) return;
     setDownloading(true);
     try {
-      await downloadPagePdf(
-        activePage.page,
-        imgUrl(activePage.liveUrl),
-        imgUrl(activePage.diffUrl),
-        imgUrl(activePage.stagingUrl),
-      );
+      await downloadPagePdf(activePage, runId, runDate, runTime);
     } catch (err) {
       console.error("PDF download failed:", err);
       alert("Failed to generate PDF. Check the console for details.");
@@ -145,7 +315,6 @@ export default function ResultsPage({ result, onGoCompare }) {
   // ── Layout ───────────────────────────────────────────────────────────────
   return (
     <div className="fade-in">
-
       {/* ── Run meta bar ─────────────────────────────────────────────────── */}
       <div className="run-meta-bar">
         <div className="run-meta-item">
@@ -184,10 +353,7 @@ export default function ResultsPage({ result, onGoCompare }) {
                 onClick={() => setActivePageIdx(i)}
               >
                 {r.page}
-                <span
-                  className="page-tab-mismatch"
-                  style={{ background: mc.bg, color: mc.color }}
-                >
+                <span className="page-tab-mismatch" style={{ background: mc.bg, color: mc.color }}>
                   {r.avgMismatchPct ?? 0}%
                 </span>
               </button>
@@ -197,10 +363,7 @@ export default function ResultsPage({ result, onGoCompare }) {
       )}
 
       {activePage && (
-        <div
-          className="result-card"
-          style={{ borderTopLeftRadius: results.length > 1 ? 0 : undefined }}
-        >
+        <div className="result-card" style={{ borderTopLeftRadius: results.length > 1 ? 0 : undefined }}>
           {/* ── Card header ──────────────────────────────────────────────── */}
           <div className="result-header">
             <div className="result-header-left">
@@ -209,58 +372,43 @@ export default function ResultsPage({ result, onGoCompare }) {
               {/* URL pair */}
               <div className="result-url-pair">
                 <span className="result-url-tag result-url-tag-live">Live</span>
-                <a
-                  href={activePage.livePageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="result-url-link"
-                >
+                <a href={activePage.livePageUrl} target="_blank" rel="noopener noreferrer" className="result-url-link">
                   {activePage.livePageUrl}
                 </a>
               </div>
               <div className="result-url-pair">
                 <span className="result-url-tag result-url-tag-staging">Staging</span>
-                <a
-                  href={activePage.stagingPageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="result-url-link"
-                >
+                <a href={activePage.stagingPageUrl} target="_blank" rel="noopener noreferrer" className="result-url-link">
                   {activePage.stagingPageUrl}
                 </a>
               </div>
 
               {/* Section stats row */}
               <div className="result-section-stats">
-                <span className="stat-pill stat-pill-green">
-                  {activePage.sectionCount.matched} matched
-                </span>
+                <span className="stat-pill stat-pill-green">{activePage.sectionCount.matched} matched</span>
                 {activePage.sectionCount.missingInStaging > 0 && (
-                  <span className="stat-pill stat-pill-amber">
-                    {activePage.sectionCount.missingInStaging} missing in staging
-                  </span>
+                  <span className="stat-pill stat-pill-amber">{activePage.sectionCount.missingInStaging} missing in staging</span>
                 )}
-                <span className="stat-pill stat-pill-grey">
-                  {activePage.sectionCount.defined} defined
-                </span>
+                <span className="stat-pill stat-pill-grey">{activePage.sectionCount.defined} defined</span>
               </div>
             </div>
 
             <div className="result-header-right">
               {/* Mismatch percentage badge */}
-              {activePage.avgMismatchPct !== undefined && (() => {
-                const mc = mismatchColor(activePage.avgMismatchPct);
-                return (
-                  <div
-                    className="mismatch-badge"
-                    style={{ background: mc.bg, color: mc.color }}
-                    title="Average mismatch percentage across all captured sections"
-                  >
-                    <span className="mismatch-badge-value">{activePage.avgMismatchPct}%</span>
-                    <span className="mismatch-badge-label">mismatch</span>
-                  </div>
-                );
-              })()}
+              {activePage.avgMismatchPct !== undefined &&
+                (() => {
+                  const mc = mismatchColor(activePage.avgMismatchPct);
+                  return (
+                    <div
+                      className="mismatch-badge"
+                      style={{ background: mc.bg, color: mc.color }}
+                      title="Average mismatch percentage across all captured sections"
+                    >
+                      <span className="mismatch-badge-value">{activePage.avgMismatchPct}%</span>
+                      <span className="mismatch-badge-label">mismatch</span>
+                    </div>
+                  );
+                })()}
 
               {/* PDF download */}
               <button
@@ -279,10 +427,14 @@ export default function ResultsPage({ result, onGoCompare }) {
                   <>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="15" height="15"
+                      width="15"
+                      height="15"
                       viewBox="0 0 24 24"
-                      fill="none" stroke="currentColor"
-                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       aria-hidden="true"
                     >
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />

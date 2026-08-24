@@ -2,8 +2,7 @@ import React, { useState, useCallback } from "react";
 import LoginPage from "./pages/LoginPage";
 import ComparePage from "./pages/ComparePage";
 import ResultsPage from "./pages/ResultsPage";
-
-const API_BASE = "http://localhost:4000";
+import { API_BASE } from "./constants/api";
 
 export default function App() {
   const [user,        setUser]        = useState(() => localStorage.getItem("vdt_user") || "");

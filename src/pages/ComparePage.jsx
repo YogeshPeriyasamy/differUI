@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
-
-const API_BASE = "http://localhost:4000";
+import { API_BASE } from "../constants/api";
 
 // ---------------------------------------------------------------------------
 // Lightweight same-site validation.
