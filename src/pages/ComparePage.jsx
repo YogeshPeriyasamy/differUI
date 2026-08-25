@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useCompare } from "../hooks/useCompare";
+import RunningLoader from "../components/RunningLoader";
 import deskTopLogo from "../../assets/desktopLogo.png";
 import mobileLogo from "../../assets/mobileLogo.png";
 
@@ -28,8 +29,12 @@ export default function ComparePage({ onRunComplete }) {
   const [activeResolutionSelector, setActiveResolutionSelector] = useState("desktop");
 
   return (
-    <div className="fade-in">
-      <div className="compare-card">
+    <>
+      {/* Fullscreen overlay — rendered outside the card so it covers everything */}
+      <RunningLoader visible={running} />
+
+      <div className="fade-in">
+      <div className={`compare-card${running ? " compare-disabled" : ""}`}>
         {/* ── Instructions ── */}
         <div className="compare-sub" style={{ marginBottom: 20 }}>
           Enter the <strong style={{ color: "#16a34a" }}>Live</strong> and <strong style={{ color: "#d97706" }}>Staging</strong> base URLs
@@ -50,6 +55,7 @@ export default function ComparePage({ onRunComplete }) {
             onBlur={validateUrls}
             autoComplete="off"
             spellCheck="false"
+            disabled={running}
           />
         </div>
 
@@ -67,6 +73,7 @@ export default function ComparePage({ onRunComplete }) {
             onBlur={validateUrls}
             autoComplete="off"
             spellCheck="false"
+            disabled={running}
           />
         </div>
 
@@ -84,7 +91,7 @@ export default function ComparePage({ onRunComplete }) {
         )}
 
         {/* ── Fetch Pages button ── */}
-        <button className="fetch-pages-btn" onClick={handleFetchPages} disabled={!canFetch}>
+        <button className="fetch-pages-btn" onClick={handleFetchPages} disabled={!canFetch || running}>
           {fetchState === "loading" ? (
             <>
               <span className="btn-mini-spinner" />
@@ -129,11 +136,11 @@ export default function ComparePage({ onRunComplete }) {
             <div className="field-label" style={{ justifyContent: "space-between" }}>
               <span>Select Pages</span>
               <span className="page-sel-actions">
-                <button className="text-action-btn" onClick={selectAll}>
+                <button className="text-action-btn" onClick={selectAll} disabled={running}>
                   Select all
                 </button>
                 <span className="text-action-sep">·</span>
-                <button className="text-action-btn" onClick={clearAll}>
+                <button className="text-action-btn" onClick={clearAll} disabled={running}>
                   Clear
                 </button>
               </span>
@@ -143,8 +150,8 @@ export default function ComparePage({ onRunComplete }) {
               {pageList.map((p) => {
                 const checked = selectedPages.includes(p.id);
                 return (
-                  <label key={p.id} className={`page-checkbox-item${checked ? " page-checkbox-item-checked" : ""}`}>
-                    <input type="checkbox" checked={checked} onChange={() => togglePage(p.id)} className="page-checkbox-input" />
+                  <label key={p.id} className={`page-checkbox-item${checked ? " page-checkbox-item-checked" : ""}${running ? " page-checkbox-item-disabled" : ""}`}>
+                    <input type="checkbox" checked={checked} onChange={() => togglePage(p.id)} className="page-checkbox-input" disabled={running} />
                     <span className="page-checkbox-label">{p.label}</span>
                     <span className="page-checkbox-path">{p.path}</span>
                     {checked && (
@@ -175,6 +182,7 @@ export default function ComparePage({ onRunComplete }) {
               className={`resButton${activeResolutionSelector === "desktop" ? " active" : ""}`}
               onClick={() => setActiveResolutionSelector("desktop")}
               aria-pressed={activeResolutionSelector === "desktop"}
+              disabled={running}
             >
               <img className="resIcon" src={deskTopLogo} alt="Desktop View" />
             </button>
@@ -183,6 +191,7 @@ export default function ComparePage({ onRunComplete }) {
               className={`resButton${activeResolutionSelector === "mobile" ? " active" : ""}`}
               onClick={() => setActiveResolutionSelector("mobile")}
               aria-pressed={activeResolutionSelector === "mobile"}
+              disabled={running}
             >
               <img className="resIcon" src={mobileLogo} alt="Mobile View" />
             </button>
@@ -199,6 +208,7 @@ export default function ComparePage({ onRunComplete }) {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

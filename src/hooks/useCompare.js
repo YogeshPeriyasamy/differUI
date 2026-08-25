@@ -16,7 +16,7 @@ export function useCompare({ onRunComplete }) {
   const [siteKey, setSiteKey] = useState(null);
   const [pageList, setPageList] = useState([]);
   const [selectedPages, setSelectedPages] = useState([]);
-  const [running, setRunning] = useState(false);
+  const [running, setRunning] = useState(true);
 
   // Keeps the cleaned origins from the last successful fetch
   const fetchedUrls = useRef({ live: "", staging: "" });

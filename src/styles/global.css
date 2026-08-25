@@ -1802,3 +1802,200 @@ body {
   color: #64748b;
   margin-top: 8px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* RunningLoader — fullscreen overlay + centred card                           */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Backdrop: full viewport, semi-transparent grey, above everything */
+.rl-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(30, 35, 48, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: rl-fade-in 0.2s ease both;
+}
+
+@keyframes rl-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* White card in the centre */
+.rl-card {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  padding: 40px 44px 36px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  animation: rl-slide-up 0.25s ease both;
+}
+
+@keyframes rl-slide-up {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── SVG ring spinner ── */
+.rl-spinner-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 28px;
+  flex-shrink: 0;
+}
+
+.rl-ring {
+  width: 64px;
+  height: 64px;
+  animation: rl-rotate 1.4s linear infinite;
+}
+
+@keyframes rl-rotate {
+  to { transform: rotate(360deg); }
+}
+
+.rl-ring-track {
+  fill: none;
+  stroke: #f0f2f5;
+  stroke-width: 4;
+}
+
+.rl-ring-fill {
+  fill: none;
+  stroke: #c0392b;
+  stroke-width: 4;
+  stroke-linecap: round;
+  /* dash = circumference ≈ 113; show ~70% of it */
+  stroke-dasharray: 80 113;
+  stroke-dashoffset: 0;
+  animation: rl-dash 1.4s ease-in-out infinite;
+}
+
+@keyframes rl-dash {
+  0%   { stroke-dasharray: 10 113; stroke-dashoffset:  0; }
+  50%  { stroke-dasharray: 85 113; stroke-dashoffset: -25; }
+  100% { stroke-dasharray: 10 113; stroke-dashoffset: -113; }
+}
+
+/* Inner pulsing dot */
+.rl-spinner-inner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #c0392b;
+  animation: rl-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes rl-pulse {
+  0%, 100% { transform: scale(1);   opacity: 1;   }
+  50%       { transform: scale(0.6); opacity: 0.4; }
+}
+
+/* ── Step label (big heading that cycles) ── */
+.rl-step-label {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: -0.3px;
+  text-align: center;
+  margin-bottom: 8px;
+  animation: rl-text-in 0.35s ease both;
+}
+
+/* ── Sub-message ── */
+.rl-message {
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.5;
+  min-height: 40px;
+  margin-bottom: 24px;
+  animation: rl-text-in 0.35s ease both;
+}
+
+@keyframes rl-text-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── Step indicator dots ── */
+.rl-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.rl-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.rl-dot-done {
+  background: rgba(192, 57, 43, 0.35);
+  transform: scale(0.85);
+}
+
+.rl-dot-active {
+  background: #c0392b;
+  transform: scale(1.25);
+}
+
+/* ── Progress bar ── */
+.rl-progress-track {
+  width: 100%;
+  height: 4px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.rl-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #c0392b, #e74c3c);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Footer note ── */
+.rl-please-wait {
+  font-size: 11.5px;
+  color: #94a3b8;
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+/* ── Compare page: disabled state when running ── */
+.compare-disabled {
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.45;
+  filter: grayscale(0.3);
+  transition: opacity 0.2s, filter 0.2s;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .rl-card {
+    max-width: calc(100vw - 40px);
+    padding: 32px 24px 28px;
+  }
+}
