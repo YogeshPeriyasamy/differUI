@@ -1,71 +1,26 @@
 import React, { useState, useCallback } from "react";
-import LoginPage from "./pages/LoginPage";
+import LoginPage   from "./pages/LoginPage";
 import ComparePage from "./pages/ComparePage";
 import ResultsPage from "./pages/ResultsPage";
-import { API_BASE } from "./constants/api";
+import { useAuth }    from "./hooks/useAuth";
+import { getInitials } from "./utils/user";
 
 export default function App() {
-  const [user,        setUser]        = useState(() => localStorage.getItem("vdt_user") || "");
+  const { user, logout } = useAuth();
+
   const [tab,         setTab]         = useState("compare");
   const [result,      setResult]      = useState(null);
   const [loading,     setLoading]     = useState(false);
-  const [loadingMsg,  setLoadingMsg]  = useState("Capturing and comparing…");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const handleLogin = (email) => {
-    setUser(email);
-    localStorage.setItem("vdt_user", email);
-  };
-
-  const handleLogout = () => {
-    setUser("");
-    localStorage.removeItem("vdt_user");
-  };
-
-  const getInitials = (email) => {
-    if (!email) return "JD";
-    const namePart = email.split("@")[0];
-    const parts    = namePart.split(/[._-]/);
-    return parts.length > 1 && parts[1]
-      ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : namePart.slice(0, 2).toUpperCase();
-  };
-
-  // onRun(siteKey, pages, liveBaseUrl, stagingBaseUrl)
-  const handleRun = useCallback(async (siteKey, pages, liveBaseUrl, stagingBaseUrl) => {
-    setLoading(true);
-    setLoadingMsg("Capturing and comparing…");
-    try {
-      const res = await fetch(`${API_BASE}/compare-site`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          siteName:       siteKey,
-          liveBaseUrl,
-          stagingBaseUrl,
-          pages,
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to compare site");
-      }
-
-      // { runId, runDate, runTime, results: [...] }
-      const data = await res.json();
-     
-      setResult(data);
-      setTab("results");
-    } catch (err) {
-      console.error(err);
-      alert(`Error: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+  // Called by ComparePage's hook when a compare run finishes
+  const handleRunComplete = useCallback((data) => {
+    setResult(data);
+    setTab("results");
+    setLoading(false);
   }, []);
 
-  if (!user) return <LoginPage onLogin={handleLogin} />;
+  if (!user) return <LoginPage onLogin={() => {}} />;
 
   const totalPages = result?.results?.length ?? 0;
 
@@ -74,7 +29,7 @@ export default function App() {
       {loading && (
         <div className="loading-overlay">
           <div className="spinner" />
-          <div className="loading-text">{loadingMsg}</div>
+          <div className="loading-text">Capturing and comparing…</div>
         </div>
       )}
 
@@ -82,34 +37,42 @@ export default function App() {
         <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <aside className={`sidebar${sidebarOpen ? " sidebar-open" : ""}`}>
         <div className="sidebar-logo-wrap">
           <div className="sidebar-logo">V</div>
           <div>
-            <div className="sidebar-brand-text">VisualDiff</div>
+            <div className="sidebar-brand-text">Visual_Differ</div>
             <div className="sidebar-brand-sub">Regression Tool</div>
           </div>
         </div>
 
         <div className="sidebar-nav-section">Main</div>
+
         <div
           className={`sidebar-icon ${tab === "compare" ? "active" : ""}`}
           onClick={() => { setTab("compare"); setSidebarOpen(false); }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && setTab("compare")}
         >
-          <span className="sidebar-icon-emoji">⊞</span>
+          <span className="sidebar-icon-emoji" aria-hidden="true">⊞</span>
           <span className="sidebar-icon-label">Compare</span>
         </div>
+
         <div
           className={`sidebar-icon ${tab === "results" ? "active" : ""}`}
           onClick={() => { setTab("results"); setSidebarOpen(false); }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && setTab("results")}
         >
-          <span className="sidebar-icon-emoji">◫</span>
+          <span className="sidebar-icon-emoji" aria-hidden="true">◫</span>
           <span className="sidebar-icon-label">Results</span>
         </div>
       </aside>
 
-      {/* Main panel */}
+      {/* ── Main panel ── */}
       <div className="main-panel">
         <div className="topbar">
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -121,7 +84,7 @@ export default function App() {
               ☰
             </button>
             <div>
-              <div className="topbar-title">VisualDiff</div>
+              <div className="topbar-title">Visual_Differ</div>
               <div className="topbar-sub">Visual Regression Tool</div>
             </div>
           </div>
@@ -129,7 +92,7 @@ export default function App() {
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div className="topbar-user" title={user}>{getInitials(user)}</div>
             <button
-              onClick={handleLogout}
+              onClick={logout}
               style={{
                 background: "transparent",
                 border: "1px solid #dde3ec",
@@ -151,19 +114,29 @@ export default function App() {
           <div
             className={`tab-item ${tab === "compare" ? "active" : ""}`}
             onClick={() => setTab("compare")}
+            role="tab"
+            aria-selected={tab === "compare"}
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && setTab("compare")}
           >
             Compare
           </div>
           <div
             className={`tab-item ${tab === "results" ? "active" : ""}`}
             onClick={() => setTab("results")}
+            role="tab"
+            aria-selected={tab === "results"}
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && setTab("results")}
           >
             Results{totalPages > 0 ? ` (${totalPages} page${totalPages !== 1 ? "s" : ""})` : ""}
           </div>
         </div>
 
         <div className="content-area">
-          {tab === "compare" && <ComparePage onRun={handleRun} />}
+          {tab === "compare" && (
+            <ComparePage onRunComplete={handleRunComplete} />
+          )}
           {tab === "results" && (
             <ResultsPage result={result} onGoCompare={() => setTab("compare")} />
           )}

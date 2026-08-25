@@ -1,3 +1,31 @@
-node_modules
-dist
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Build output ──────────────────────────────────────────────────────────────
+dist/
+dist-ssr/
+
+# ── Environment / secrets (NEVER commit these) ────────────────────────────────
 .env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Editor / OS artefacts ─────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ── Vite / TypeScript cache ───────────────────────────────────────────────────
+*.local
+vite.config.js.timestamp-*
+tsconfig.tsbuildinfo

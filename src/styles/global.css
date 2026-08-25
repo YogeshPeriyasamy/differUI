@@ -1,4 +1,6 @@
-*,*::before,*::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -7,7 +9,7 @@
 body {
   background: #f4f5f7;
   min-height: 100vh;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 .app-root {
@@ -83,7 +85,9 @@ body {
   font-size: 15px;
   cursor: pointer;
   margin-bottom: 2px;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   border-left: 3px solid transparent;
   user-select: none;
 }
@@ -98,7 +102,7 @@ body {
 .sidebar-icon-label {
   font-size: 13.5px;
   font-weight: 500;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 .sidebar-icon:hover {
@@ -175,7 +179,9 @@ body {
   color: #8892a4;
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
   user-select: none;
 }
 
@@ -247,11 +253,13 @@ body {
   border: 1.5px solid #e4e7ed;
   border-radius: 7px;
   font-size: 14px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #1a1a2e;
   background: #ffffff;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .url-input:focus {
@@ -281,9 +289,11 @@ body {
   border-radius: 7px;
   font-size: 14px;
   font-weight: 500;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    transform 0.1s;
   letter-spacing: 0.1px;
 }
 
@@ -304,7 +314,7 @@ body {
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -345,7 +355,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Results ── */
@@ -455,8 +467,14 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to   { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ── Hamburger button ── */
@@ -487,7 +505,7 @@ body {
 }
 
 .urlHolder {
-  display: flex;  
+  display: flex;
   flex-direction: column;
   gap: 10px;
 }
@@ -498,12 +516,50 @@ body {
   border: 1.5px solid #e4e7ed;
   border-radius: 7px;
   font-size: 14px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #1a1a2e;
   background: #ffffff;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
- 
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.runComparison {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resolutionSel {
+  display: flex;
+  gap: 10px;
+}
+
+.resButton {
+  padding: 3px 40px;
+  outline: none;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 1px 1px #acadaf;
+  display: flex;
+  align-items: center;
+}
+
+.resButton.active {
+  background-color: #dca099;
+}
+
+.resIcon {
+  object-fit: cover;
+  width: 24px;
+}
+.UrlErrorBox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* ── Responsive: Tablet (≤ 900px) ── */
@@ -622,11 +678,10 @@ body {
   .empty-results {
     padding: 48px 16px;
   }
-
 }
 
 /* ── Responsive: Small mobile (≤ 400px) ── */
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .topbar-title {
     font-size: 14px;
   }
@@ -638,6 +693,11 @@ body {
   .compare-card {
     padding: 16px 12px;
   }
+
+   .result-header-right {
+    align-items: flex-start;
+  }
+
 }
 
 /* ── Screenshot Mode Selector ── */
@@ -676,7 +736,10 @@ body {
   padding: 18px 16px;
   cursor: pointer;
   background: #fff;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.15s;
   user-select: none;
 }
 
@@ -688,7 +751,9 @@ body {
 
 .mode-card.mode-card-active {
   border-color: #c0392b;
-  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12), 0 2px 12px rgba(192, 57, 43, 0.08);
+  box-shadow:
+    0 0 0 3px rgba(192, 57, 43, 0.12),
+    0 2px 12px rgba(192, 57, 43, 0.08);
 }
 
 .mode-card-radio {
@@ -702,7 +767,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 
 .mode-card-active .mode-card-radio {
@@ -767,14 +834,28 @@ body {
   animation: fadeSlideIn 0.35s ease both;
 }
 
-.section-card:nth-child(1) { animation-delay: 0s; }
-.section-card:nth-child(2) { animation-delay: 0.06s; }
-.section-card:nth-child(3) { animation-delay: 0.12s; }
-.section-card:nth-child(4) { animation-delay: 0.18s; }
+.section-card:nth-child(1) {
+  animation-delay: 0s;
+}
+.section-card:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.section-card:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.section-card:nth-child(4) {
+  animation-delay: 0.18s;
+}
 
 @keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .section-card-header {
@@ -916,6 +997,13 @@ body {
   .section-diff-img {
     max-height: 120px;
   }
+  .runComparison {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .result-header-right {
+    align-items: flex-start;
+  }
 }
 
 /* ── Site selector ── */
@@ -935,10 +1023,13 @@ body {
   background: #fff;
   font-size: 13.5px;
   font-weight: 500;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #4a5568;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    color 0.15s;
 }
 
 .site-btn:hover {
@@ -975,7 +1066,9 @@ body {
   border-radius: 8px;
   cursor: pointer;
   background: #fff;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
   user-select: none;
 }
 
@@ -1024,7 +1117,7 @@ body {
   color: #c0392b;
   cursor: pointer;
   padding: 0 2px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 .text-action-btn:hover {
@@ -1097,13 +1190,15 @@ body {
   padding: 10px 20px;
   font-size: 13px;
   font-weight: 500;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #8892a4;
   background: transparent;
   border: none;
   border-right: 1px solid #e4e7ed;
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
 }
 
 .page-tab-btn:last-child {
@@ -1198,11 +1293,14 @@ body {
   border-radius: 7px;
   font-size: 12.5px;
   font-weight: 600;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s,
+    transform 0.1s;
 }
 
 .pdf-download-btn:hover:not(:disabled) {
@@ -1235,6 +1333,7 @@ body {
 .url-error-msg {
   display: flex;
   align-items: flex-start;
+  justify-content: space-between;
   gap: 6px;
   font-size: 12.5px;
   color: #b91c1c;
@@ -1244,6 +1343,10 @@ body {
   padding: 9px 12px;
   margin-bottom: 16px;
   line-height: 1.45;
+}
+
+.url-error-msg > div:nth-child(2) {
+  color: #1e2330;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -1260,9 +1363,11 @@ body {
   border-radius: 7px;
   font-size: 13.5px;
   font-weight: 500;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition:
+    background 0.15s,
+    opacity 0.15s;
   margin-bottom: 14px;
 }
 
@@ -1328,7 +1433,7 @@ body {
 }
 
 .btn-mini-spinner-white {
-  border-color: rgba(255,255,255,0.35);
+  border-color: rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
 }
 
@@ -1408,8 +1513,10 @@ body {
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  transition: color 0.15s, border-color 0.15s;
+  font-family: "DM Sans", sans-serif;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .page-tab-btn:hover {
@@ -1559,10 +1666,12 @@ body {
   border-radius: 7px;
   font-size: 13px;
   font-weight: 500;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #4a5568;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 
 .pdf-download-btn:hover:not(:disabled) {
@@ -1596,9 +1705,18 @@ body {
   border-radius: 20px;
 }
 
-.stat-pill-green  { background: #dcfce7; color: #15803d; }
-.stat-pill-amber  { background: #fef3c7; color: #b45309; }
-.stat-pill-grey   { background: #f1f5f9; color: #64748b; }
+.stat-pill-green {
+  background: #dcfce7;
+  color: #15803d;
+}
+.stat-pill-amber {
+  background: #fef3c7;
+  color: #b45309;
+}
+.stat-pill-grey {
+  background: #f1f5f9;
+  color: #64748b;
+}
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* Page checkbox list (shared styles referenced by ComparePage)                 */
@@ -1617,7 +1735,9 @@ body {
   border: 1.5px solid #e4e7ed;
   border-radius: 7px;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
   user-select: none;
 }
 
@@ -1665,10 +1785,12 @@ body {
   color: #c0392b;
   cursor: pointer;
   padding: 0;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
-.text-action-btn:hover { text-decoration: underline; }
+.text-action-btn:hover {
+  text-decoration: underline;
+}
 
 .text-action-sep {
   color: #cbd5e1;
