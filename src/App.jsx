@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import LoginPage   from "./pages/LoginPage";
+// import LoginPage   from "./pages/LoginPage";
 import ComparePage from "./pages/ComparePage";
 import ResultsPage from "./pages/ResultsPage";
 import { useAuth }    from "./hooks/useAuth";
@@ -20,7 +20,8 @@ export default function App() {
     setLoading(false);
   }, []);
 
-  if (!user) return <LoginPage onLogin={() => {}} />;
+  // Login temporarily bypassed so direct URL entry opens the dashboard.
+  // if (!user) return <LoginPage onLogin={() => {}} />;
 
   const totalPages = result?.results?.length ?? 0;
 
@@ -89,7 +90,7 @@ export default function App() {
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {/* <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div className="topbar-user" title={user}>{getInitials(user)}</div>
             <button
               onClick={logout}
@@ -107,7 +108,7 @@ export default function App() {
             >
               Sign Out
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="tab-bar">

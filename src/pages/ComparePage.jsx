@@ -89,8 +89,8 @@ export default function ComparePage({ onRunComplete }) {
               <span style={{ marginRight: 6 }}>⚠</span>
               {urlError}
             </div>
-            <div onClick={handleFetchPages}>
-              <span style={{ marginRight: 6 }}>⟳</span> Refetch
+            <div style={{cursor:"pointer"}} onClick={handleFetchPages}>
+              <span style={{ marginRight: 6, }}>⟳</span> Refetch
             </div>
           </div>
         )}

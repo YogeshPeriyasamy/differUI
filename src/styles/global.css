@@ -67,7 +67,7 @@ body {
 }
 
 .sidebar-nav-section {
-  font-size: 10px;
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: 0.8px;
   text-transform: uppercase;
@@ -545,6 +545,7 @@ body {
   box-shadow: 1px 1px #acadaf;
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 
 .resButton.active {

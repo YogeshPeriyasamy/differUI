@@ -21,7 +21,7 @@ export async function downloadPagePdf(activePage, runId, runDate, runTime) {
 
   const entries = [
     { label: "Live", url: liveUrl, color: [65, 65, 65] },
-    { label: "Difference", url: diffUrl, color: [255, 0, 0] },
+    { label: "Comparison Analysis", url: diffUrl, color: [255, 0, 0] },
     { label: "Staging", url: stagingUrl, color: [65, 65, 65] },
   ];
 
