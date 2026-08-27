@@ -4,8 +4,8 @@
  * async comparison run with real-time progress polling.
  */
 
-import { useState, useRef, useCallback } from "react";
-import { fetchPages, startCompareSite, pollRunStatus, fetchProgress } from "../services/api";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { fetchPages, startCompareSite, pollRunStatus, fetchProgress, deleteRun } from "../services/api";
 import { isValidUrl, isSameSite, toOrigin } from "../utils/url";
 
 // const POLL_INTERVAL_MS = 1500; // how often to hit GET /compare-site/:id/status
@@ -191,6 +191,13 @@ export function useCompare({ onRunComplete }) {
       setRunProgress({ phase: "Initialising", progress: 0 });
 
       try {
+        const activeRunId = localStorage.getItem("activeRunId")
+        console.log("active runId ref...........", );
+        if (activeRunId) {
+          await deleteRun(activeRunId);    
+          localStorage.removeItem("activeRunId");
+        }
+
         const { runId } = await startCompareSite({
           siteName: siteKey,
           liveBaseUrl: fetchedUrls.current.live,
@@ -198,6 +205,8 @@ export function useCompare({ onRunComplete }) {
           pages: selectedPages,
           selectedDisplayResolution: selectedDisplay,
         });
+
+        localStorage.setItem("activeRunId", runId);
 
         startPolling(runId);
       } catch (err) {

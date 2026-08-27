@@ -55,7 +55,7 @@ export async function pollRunStatus(runId) {
   return request(`/compare-site/${encodeURIComponent(runId)}/status`); //encodeURIComponent->"https://example.com/search?name=John Doe" to "https%3A%2F%2Fexample.com%2Fsearch%3Fname%3DJohn%20Doe"
 }
 
-export async function fetchProgress(runId, { onProgress, onDone, onError }) {
+export function fetchProgress(runId, { onProgress, onDone, onError }) {
   const eventSource = new EventSource(`${API_BASE}/compare-site/${runId}/status`); //server sent event its like websocket but connects server to browser not browser to server server can send the current progress through this channel
   eventSource.onmessage = (event) => {
     const snap = JSON.parse(event.data);
@@ -77,6 +77,16 @@ export async function fetchProgress(runId, { onProgress, onDone, onError }) {
 
   return eventSource;
 }
+
+/**API to delete the completed run
+ * It also removes the runId from the local storage 
+ */
+export async function deleteRun(runId) {
+  return request(`/compare-site/${runId}`, {
+    method: "DELETE",
+  });
+}
+
 /**
  * Resolves a relative image path returned by the backend to a full URL.
  * Absolute URLs, data URIs, and blob URLs are returned unchanged.

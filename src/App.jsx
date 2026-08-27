@@ -1,16 +1,17 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 // import LoginPage   from "./pages/LoginPage";
 import ComparePage from "./pages/ComparePage";
 import ResultsPage from "./pages/ResultsPage";
-import { useAuth }    from "./hooks/useAuth";
+import { useAuth } from "./hooks/useAuth";
 import { getInitials } from "./utils/user";
+import { deleteRun } from "./services/api";
 
 export default function App() {
   const { user, logout } = useAuth();
 
-  const [tab,         setTab]         = useState("compare");
-  const [result,      setResult]      = useState(null);
-  const [loading,     setLoading]     = useState(false);
+  const [tab, setTab] = useState("compare");
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Called by ComparePage's hook when a compare run finishes
@@ -20,6 +21,14 @@ export default function App() {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    const activeRunId = localStorage.getItem("activeRunId");
+    if (activeRunId) {
+      deleteRun(activeRunId).then(() => {
+        localStorage.removeItem("activeRunId");
+      });
+    }
+  }, []);
   // Login temporarily bypassed so direct URL entry opens the dashboard.
   // if (!user) return <LoginPage onLogin={() => {}} />;
 
@@ -34,9 +43,7 @@ export default function App() {
         </div>
       )}
 
-      {sidebarOpen && (
-        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
-      )}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
 
       {/* ── Sidebar ── */}
       <aside className={`sidebar${sidebarOpen ? " sidebar-open" : ""}`}>
@@ -52,23 +59,33 @@ export default function App() {
 
         <div
           className={`sidebar-icon ${tab === "compare" ? "active" : ""}`}
-          onClick={() => { setTab("compare"); setSidebarOpen(false); }}
+          onClick={() => {
+            setTab("compare");
+            setSidebarOpen(false);
+          }}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === "Enter" && setTab("compare")}
         >
-          <span className="sidebar-icon-emoji" aria-hidden="true">⊞</span>
+          <span className="sidebar-icon-emoji" aria-hidden="true">
+            ⊞
+          </span>
           <span className="sidebar-icon-label">Compare</span>
         </div>
 
         <div
           className={`sidebar-icon ${tab === "results" ? "active" : ""}`}
-          onClick={() => { setTab("results"); setSidebarOpen(false); }}
+          onClick={() => {
+            setTab("results");
+            setSidebarOpen(false);
+          }}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === "Enter" && setTab("results")}
         >
-          <span className="sidebar-icon-emoji" aria-hidden="true">◫</span>
+          <span className="sidebar-icon-emoji" aria-hidden="true">
+            ◫
+          </span>
           <span className="sidebar-icon-label">Results</span>
         </div>
       </aside>
@@ -77,11 +94,7 @@ export default function App() {
       <div className="main-panel">
         <div className="topbar">
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button
-              className="hamburger-btn"
-              onClick={() => setSidebarOpen((v) => !v)}
-              aria-label="Toggle menu"
-            >
+            <button className="hamburger-btn" onClick={() => setSidebarOpen((v) => !v)} aria-label="Toggle menu">
               ☰
             </button>
             <div>
@@ -135,12 +148,8 @@ export default function App() {
         </div>
 
         <div className="content-area">
-          {tab === "compare" && (
-            <ComparePage onRunComplete={handleRunComplete} />
-          )}
-          {tab === "results" && (
-            <ResultsPage result={result} onGoCompare={() => setTab("compare")} />
-          )}
+          {tab === "compare" && <ComparePage onRunComplete={handleRunComplete} />}
+          {tab === "results" && <ResultsPage result={result} onGoCompare={() => setTab("compare")} />}
         </div>
       </div>
     </div>
