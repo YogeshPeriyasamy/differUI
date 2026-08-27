@@ -1,38 +1,70 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo } from "react";
 
-// Cycling status steps shown during a comparison run
+/**
+ * Five display steps driven by real backend progress thresholds.
+ *
+ * threshold  — minimum backend progress % to enter this step
+ * label      — bold heading shown in the card
+ * message    — softer sub-line shown below the heading
+ */
 const STEPS = [
-  { label: "Initialising",      message: "Setting up the comparison environment…"  },
-  { label: "Capturing Live",    message: "Taking screenshots of the live site…"     },
-  { label: "Capturing Staging", message: "Taking screenshots of the staging site…"  },
-  { label: "Comparing",         message: "Analysing pixel differences…"             },
-  { label: "Building Report",   message: "Almost there — preparing your results…"   },
+  {
+    threshold: 0,
+    label:     "Initialising",
+    message:   "Setting things up — this will only take a moment.",
+  },
+  {
+    threshold: 20,
+    label:     "Capturing screenshots",
+    message:   "Visiting every page on both environments and taking section based screenshots.",
+  },
+  {
+    threshold: 40,
+    label:     "Processing images",
+    message:   "Normalising dimensions and preparing images for pixel comparison.",
+  },
+  {
+    threshold: 60,
+    label:     "Comparing differences",
+    message:   "Running pixel-level analysis and highlighting visual changes.",
+  },
+  {
+    threshold: 80,
+    label:     "Building report",
+    message:   "Stitching the diff images together and assembling your results.",
+  },
 ];
 
-const STEP_DURATION = 2000; // ms per step
-
-export default function RunningLoader({ visible }) {
-  const [stepIdx, setStepIdx] = useState(0);
-
-  // Cycle through steps while visible
-  useEffect(() => {
-    if (!visible) {
-      setStepIdx(0);
-      return;
+/**
+ * RunningLoader
+ *
+ * Props
+ *   visible     {boolean}  — mount/unmount the overlay
+ *   phase       {string}   — raw backend phase string (displayed as fine-print)
+ *   progress    {number}   — 0–100, drives step selection and progress bar
+ */
+export default function RunningLoader({ visible, phase = "Initialising", progress = 0 }) {
+  // Derive which step to display from the real progress value
+  const stepIdx = useMemo(() => {
+    let idx = 0;
+    for (let i = 0; i < STEPS.length; i++) {
+      if (progress >= STEPS[i].threshold) idx = i;
     }
-    const id = setInterval(() => {
-      setStepIdx((prev) => (prev + 1 < STEPS.length ? prev + 1 : prev));
-    }, STEP_DURATION);
-    return () => clearInterval(id);
-  }, [visible]);
+    return idx;
+  }, [progress]);
+
+  const current = STEPS[stepIdx];
 
   if (!visible) return null;
 
-  const progress = Math.round(((stepIdx + 1) / STEPS.length) * 100);
-
   return (
-    <div className="rl-backdrop" role="dialog" aria-modal="true" aria-label="Comparison in progress">
-
+    <div
+      className="rl-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Comparison in progress"
+      aria-live="polite"
+    >
       <div className="rl-card">
 
         {/* ── Spinner ── */}
@@ -44,14 +76,14 @@ export default function RunningLoader({ visible }) {
           <div className="rl-spinner-inner" aria-hidden="true" />
         </div>
 
-        {/* ── Step label ── */}
-        <div className="rl-step-label" key={stepIdx}>
-          {STEPS[stepIdx].label}
+        {/* ── Step heading — re-animates whenever stepIdx changes ── */}
+        <div className="rl-step-label" key={`label-${stepIdx}`}>
+          {current.label}
         </div>
 
-        {/* ── Sub-message ── */}
+        {/* ── Human-friendly sub-message ── */}
         <div className="rl-message" key={`msg-${stepIdx}`}>
-          {STEPS[stepIdx].message}
+          {current.message}
         </div>
 
         {/* ── Step dots ── */}
@@ -59,14 +91,26 @@ export default function RunningLoader({ visible }) {
           {STEPS.map((_, i) => (
             <span
               key={i}
-              className={`rl-dot${i === stepIdx ? " rl-dot-active" : i < stepIdx ? " rl-dot-done" : ""}`}
+              className={`rl-dot${
+                i === stepIdx ? " rl-dot-active"
+                : i < stepIdx ? " rl-dot-done"
+                : ""
+              }`}
             />
           ))}
         </div>
 
-        {/* ── Progress bar ── */}
+        {/* ── Progress bar — driven by real backend % ── */}
         <div className="rl-progress-track" aria-hidden="true">
-          <div className="rl-progress-fill" style={{ width: `${progress}%` }} />
+          <div
+            className="rl-progress-fill"
+            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+          />
+        </div>
+
+        {/* ── Fine-print: raw backend phase + numeric % ── */}
+        <div className="rl-phase-detail">
+          {phase}&nbsp;&mdash;&nbsp;{progress}%
         </div>
 
         <div className="rl-please-wait">Please wait — do not close this tab</div>

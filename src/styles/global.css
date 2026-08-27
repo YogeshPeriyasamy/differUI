@@ -1999,3 +1999,13 @@ body {
     padding: 32px 24px 28px;
   }
 }
+
+/* ── RunningLoader: raw backend phase + % fine-print ── */
+.rl-phase-detail {
+  font-size: 11px;
+  color: #b0bec5;
+  text-align: center;
+  letter-spacing: 0.15px;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}

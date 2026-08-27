@@ -22,6 +22,7 @@ export default function ComparePage({ onRunComplete }) {
     selectAll,
     clearAll,
     running,
+    runProgress,
     canRun,
     handleRun,
   } = useCompare({ onRunComplete });
@@ -31,7 +32,11 @@ export default function ComparePage({ onRunComplete }) {
   return (
     <>
       {/* Fullscreen overlay — rendered outside the card so it covers everything */}
-      <RunningLoader visible={running} />
+      <RunningLoader
+        visible={running}
+        phase={runProgress.phase}
+        progress={runProgress.progress}
+      />
 
       <div className="fade-in">
       <div className={`compare-card${running ? " compare-disabled" : ""}`}>

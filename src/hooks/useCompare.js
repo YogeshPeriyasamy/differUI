@@ -1,12 +1,14 @@
 /**
  * hooks/useCompare.js
- * Manages the compare workflow state: fetching available pages and
- * triggering the comparison run.
+ * Manages the compare workflow: URL validation, page fetching, and the
+ * async comparison run with real-time progress polling.
  */
 
 import { useState, useRef, useCallback } from "react";
-import { fetchPages, compareSite } from "../services/api";
+import { fetchPages, startCompareSite, pollRunStatus, fetchProgress } from "../services/api";
 import { isValidUrl, isSameSite, toOrigin } from "../utils/url";
+
+// const POLL_INTERVAL_MS = 1500; // how often to hit GET /compare-site/:id/status
 
 export function useCompare({ onRunComplete }) {
   const [liveUrl, setLiveUrl] = useState("");
@@ -16,10 +18,14 @@ export function useCompare({ onRunComplete }) {
   const [siteKey, setSiteKey] = useState(null);
   const [pageList, setPageList] = useState([]);
   const [selectedPages, setSelectedPages] = useState([]);
-  const [running, setRunning] = useState(true);
 
-  // Keeps the cleaned origins from the last successful fetch
+  // running: is a comparison run in progress?
+  const [running, setRunning] = useState(false);
+  // runProgress: { phase: string, progress: number } — fed to RunningLoader
+  const [runProgress, setRunProgress] = useState({ phase: "Initialising", progress: 0 });
+
   const fetchedUrls = useRef({ live: "", staging: "" });
+  const eventSourceRef = useRef(null);
 
   // ── URL change ─────────────────────────────────────────────────────────────
   const handleLiveChange = useCallback((value) => {
@@ -109,27 +115,98 @@ export function useCompare({ onRunComplete }) {
   const selectAll = useCallback(() => setSelectedPages(pageList.map((p) => p.id)), [pageList]);
   const clearAll = useCallback(() => setSelectedPages([]), []);
 
+  // ── Polling helpers ────────────────────────────────────────────────────────
+  // function stopPolling() {
+  //   if (eventSourceRef.current) {
+  //     clearInterval(eventSourceRef.current);
+  //     eventSourceRef.current = null;
+  //   }
+  // }
+  function stopPolling() {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+  }
+
+  function startPolling(runId) {
+    stopPolling();
+
+    eventSourceRef.current = fetchProgress(runId, {
+      onProgress: (snap) => {
+        setRunProgress({ phase: snap.phase ?? "Running", progress: snap.progress ?? 0 });
+      },
+      onDone: (result) => {
+        setRunProgress({ phase: "Done", progress: 100 });
+        setTimeout(() => {
+          setRunning(false);
+          onRunComplete(result);
+        }, 600);
+      },
+      onError: (msg) => {
+        stopPolling();
+        setRunning(false);
+        setRunProgress({ phase: "Initialising", progress: 0 });
+        alert(`Comparison failed: ${msg}`);
+      },
+    });
+  }
+
+  // function startPolling(runId) {
+  //   stopPolling(); // safety: clear any stale timer
+
+  //   eventSourceRef.current = setInterval(async () => {
+  //     try {
+  //       const snap = await pollRunStatus(runId);
+
+  //       // Mirror backend phase + progress into state so RunningLoader can read it
+  //       setRunProgress({ phase: snap.phase ?? "Running", progress: snap.progress ?? 0 });
+
+  //       if (snap.status === "done") {
+  //         stopPolling();
+  //         setRunProgress({ phase: "Done", progress: 100 });
+  //         setTimeout(() => {
+  //           setRunning(false);
+  //           onRunComplete(snap.result);
+  //         }, 600);
+  //       } else if (snap.status === "error") {
+  //         stopPolling();
+  //         setRunning(false);
+  //         setRunProgress({ phase: "Initialising", progress: 0 });
+  //         alert(`Comparison failed: ${snap.error ?? "Unknown error"}`);
+  //       }
+  //     } catch (err) {
+  //       // Network blip — keep polling; don't abort unless the error is permanent
+  //       console.warn("[useCompare] Poll error (will retry):", err.message);
+  //     }
+  //   }, POLL_INTERVAL_MS);
+  // }
+
   // ── Run comparison ─────────────────────────────────────────────────────────
   const handleRun = useCallback(
     async (selectedDisplay) => {
       if (!siteKey || selectedPages.length === 0 || running) return;
+
       setRunning(true);
+      setRunProgress({ phase: "Initialising", progress: 0 });
+
       try {
-        console.log("selected Display",selectedDisplay );
-        const data = await compareSite({
+        const { runId } = await startCompareSite({
           siteName: siteKey,
           liveBaseUrl: fetchedUrls.current.live,
           stagingBaseUrl: fetchedUrls.current.staging,
           pages: selectedPages,
           selectedDisplayResolution: selectedDisplay,
         });
-        onRunComplete(data);
+
+        startPolling(runId);
       } catch (err) {
-        alert(`Error: ${err.message}`);
-      } finally {
         setRunning(false);
+        setRunProgress({ phase: "Initialising", progress: 0 });
+        alert(`Failed to start comparison: ${err.message}`);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [siteKey, selectedPages, running, onRunComplete],
   );
 
@@ -157,6 +234,7 @@ export function useCompare({ onRunComplete }) {
     clearAll,
     // Run
     running,
+    runProgress,
     canRun,
     handleRun,
   };
