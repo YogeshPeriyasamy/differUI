@@ -12,7 +12,6 @@ export const API_BASE = (() => {
   return `${window.location.protocol}//${window.location.hostname}:4000`;
 })();
 
-/** Admin credentials — used by the simple auth gate.
- *  Replace with a real auth service when the user base grows. */
+/** Admin credentials — */
 export const ADMIN_EMAIL    = import.meta.env.VITE_ADMIN_EMAIL    ?? "";
 export const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "";

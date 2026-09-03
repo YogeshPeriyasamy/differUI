@@ -53,7 +53,7 @@ export function isSameSite(urlA, urlB) {
   const a = extractSiteToken(urlA);
   const b = extractSiteToken(urlB);
   if (!a || !b) return false;
-  // return a.includes(b) || b.includes(a);
+  return a.includes(b) || b.includes(a);
   
-  return a == b; // strict validation to find live and straging url for same site
+  // return a == b; // strict validation to find live and straging url for same site
 }

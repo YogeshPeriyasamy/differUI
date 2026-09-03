@@ -6,7 +6,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { fetchPages, startCompareSite, pollRunStatus, fetchProgress, deleteRun } from "../services/api";
-import { isValidUrl, isSameSite, toOrigin } from "../utils/url";
+import { isValidUrl, isSameSite } from "../utils/url";
 
 // const POLL_INTERVAL_MS = 1500; // how often to hit GET /compare-site/:id/status
 
@@ -92,8 +92,8 @@ export function useCompare({ onRunComplete }) {
     setPageList([]);
     setSelectedPages([]);
 
-    const cleanLive = toOrigin(liveUrl);
-    const cleanStaging = toOrigin(stagingUrl);
+    const cleanLive = liveUrl.trim();
+    const cleanStaging = stagingUrl.trim();
 
     try {
       const data = await fetchPages(cleanLive, cleanStaging);
