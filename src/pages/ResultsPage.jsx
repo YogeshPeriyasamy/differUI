@@ -209,7 +209,7 @@ export default function ResultsPage({ result, onGoCompare }) {
             <div className="diff-col">
               <div className="diff-col-header">
                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#c0392b", display: "inline-block" }} />
-                Diff
+                Comparison Analysis
               </div>
               <img
                 src={resolveImageUrl(activePage.diffUrl)}
