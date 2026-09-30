@@ -4,9 +4,9 @@
  * async comparison run with real-time progress polling.
  */
 
-import { useState, useRef, useCallback, useEffect } from "react";
-import { fetchPages, startCompareSite, pollRunStatus, fetchProgress, deleteRun } from "../services/api";
-import { isValidUrl, isSameSite } from "../utils/url";
+import { useState, useRef, useCallback } from "react";
+import { fetchPages, startCompareSite, fetchProgress, deleteRun } from "../services/api";
+import { isValidUrl, isSameSite, extractSiteToken } from "../utils/url";
 
 // const POLL_INTERVAL_MS = 1500; // how often to hit GET /compare-site/:id/status
 
@@ -16,8 +16,11 @@ export function useCompare({ onRunComplete }) {
   const [urlError, setUrlError] = useState("");
   const [fetchState, setFetchState] = useState("idle"); // idle | loading | done | error
   const [siteKey, setSiteKey] = useState(null);
-  const [pageList, setPageList] = useState([]);
+  const [pageList, setPageList] = useState([]);           // matched pages
+  const [addedPages, setAddedPages] = useState([]);       // new in staging
+  const [deletedPages, setDeletedPages] = useState([]);   // removed from staging
   const [selectedPages, setSelectedPages] = useState([]);
+  const [threshold, setThreshold] = useState(0.3);
 
   // running: is a comparison run in progress?
   const [running, setRunning] = useState(false);
@@ -42,6 +45,8 @@ export function useCompare({ onRunComplete }) {
     setUrlError("");
     setSiteKey(null);
     setPageList([]);
+    setAddedPages([]);
+    setDeletedPages([]);
     setSelectedPages([]);
     setFetchState("idle");
     fetchedUrls.current = { live: "", staging: "" };
@@ -90,6 +95,8 @@ export function useCompare({ onRunComplete }) {
     setFetchState("loading");
     setSiteKey(null);
     setPageList([]);
+    setAddedPages([]);
+    setDeletedPages([]);
     setSelectedPages([]);
 
     const cleanLive = liveUrl.trim();
@@ -97,8 +104,28 @@ export function useCompare({ onRunComplete }) {
 
     try {
       const data = await fetchPages(cleanLive, cleanStaging);
-      setSiteKey(data.siteKey);
-      setPageList(data.pages ?? []);
+
+      // Backend returns { pages: { matchedPages, addedPages, deletedPages } }
+      // Derive a display-friendly siteKey from the live URL
+      const matched = data.pages?.matchedPages ?? [];
+      const added   = data.pages?.addedPages   ?? [];
+      const deleted = data.pages?.deletedPages  ?? [];
+
+      // Normalise matched pages into the { id, label, path, live, staging } shape
+      // the rest of the hook/UI expects
+      const normalisedPages = matched.map((p) => ({
+        id:      p.path,   // path is unique — use as stable id
+        label:   p.label,
+        path:    p.path,
+        live:    p.live,
+        staging: p.staging,
+      }));
+
+      const key = extractSiteToken(cleanLive) ?? cleanLive;
+      setSiteKey(key);
+      setPageList(normalisedPages);
+      setAddedPages(added);
+      setDeletedPages(deleted);
       setFetchState("done");
       fetchedUrls.current = { live: cleanLive, staging: cleanStaging };
     } catch (err) {
@@ -199,11 +226,12 @@ export function useCompare({ onRunComplete }) {
         }
 
         const { runId } = await startCompareSite({
-          siteName: siteKey,
-          liveBaseUrl: fetchedUrls.current.live,
-          stagingBaseUrl: fetchedUrls.current.staging,
-          pages: selectedPages,
+          siteName:                  siteKey,
+          liveBaseUrl:               fetchedUrls.current.live,
+          stagingBaseUrl:            fetchedUrls.current.staging,
+          pages:                     selectedPages.map((id) => pageList.find((p) => p.id === id)).filter(Boolean),
           selectedDisplayResolution: selectedDisplay,
+          threshold,
         });
 
         localStorage.setItem("activeRunId", runId);
@@ -216,7 +244,7 @@ export function useCompare({ onRunComplete }) {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [siteKey, selectedPages, running, onRunComplete],
+    [siteKey, selectedPages, pageList, threshold, running, onRunComplete],
   );
 
   const canFetch = liveUrl.trim() && stagingUrl.trim() && !urlError && fetchState !== "loading";
@@ -224,27 +252,16 @@ export function useCompare({ onRunComplete }) {
 
   return {
     // URL fields
-    liveUrl,
-    stagingUrl,
-    urlError,
-    handleLiveChange,
-    handleStagingChange,
-    validateUrls,
+    liveUrl, stagingUrl, urlError,
+    handleLiveChange, handleStagingChange, validateUrls,
     // Fetch
-    fetchState,
-    siteKey,
-    pageList,
-    handleFetchPages,
-    canFetch,
+    fetchState, siteKey, pageList, addedPages, deletedPages,
+    handleFetchPages, canFetch,
     // Page selection
-    selectedPages,
-    togglePage,
-    selectAll,
-    clearAll,
+    selectedPages, togglePage, selectAll, clearAll,
+    // Threshold
+    threshold, setThreshold,
     // Run
-    running,
-    runProgress,
-    canRun,
-    handleRun,
+    running, runProgress, canRun, handleRun,
   };
 }

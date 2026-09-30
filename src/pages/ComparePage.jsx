@@ -15,6 +15,8 @@ export default function ComparePage({ onRunComplete }) {
     fetchState,
     siteKey,
     pageList,
+    addedPages,
+    deletedPages,
     handleFetchPages,
     canFetch,
     selectedPages,
@@ -25,6 +27,8 @@ export default function ComparePage({ onRunComplete }) {
     runProgress,
     canRun,
     handleRun,
+    threshold,
+    setThreshold,
   } = useCompare({ onRunComplete });
 
   const [activeResolutionSelector, setActiveResolutionSelector] = useState("desktop");
@@ -131,15 +135,16 @@ export default function ComparePage({ onRunComplete }) {
         {fetchState === "done" && siteKey && (
           <div className="site-key-badge">
             <span className="site-key-dot" />
-            Matched site: <strong>{siteKey}</strong> &mdash; {pageList.length} page{pageList.length !== 1 ? "s" : ""} available
+            Matched site: <strong>{siteKey}</strong> &mdash;{" "}
+            {pageList.length} page{pageList.length !== 1 ? "s" : ""} available
           </div>
         )}
 
-        {/* ── Page selector ── */}
+        {/* ── Matched pages selector ── */}
         {fetchState === "done" && pageList.length > 0 && (
           <div className="field-group" style={{ marginTop: 20 }}>
             <div className="field-label" style={{ justifyContent: "space-between" }}>
-              <span>Select Pages</span>
+              <span>Select Pages to Compare</span>
               <span className="page-sel-actions">
                 <button className="text-action-btn" onClick={selectAll} disabled={running}>
                   Select all
@@ -155,15 +160,20 @@ export default function ComparePage({ onRunComplete }) {
               {pageList.map((p) => {
                 const checked = selectedPages.includes(p.id);
                 return (
-                  <label key={p.id} className={`page-checkbox-item${checked ? " page-checkbox-item-checked" : ""}${running ? " page-checkbox-item-disabled" : ""}`}>
-                    <input type="checkbox" checked={checked} onChange={() => togglePage(p.id)} className="page-checkbox-input" disabled={running} />
+                  <label
+                    key={p.id}
+                    className={`page-checkbox-item${checked ? " page-checkbox-item-checked" : ""}${running ? " page-checkbox-item-disabled" : ""}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => togglePage(p.id)}
+                      className="page-checkbox-input"
+                      disabled={running}
+                    />
                     <span className="page-checkbox-label">{p.label}</span>
                     <span className="page-checkbox-path">{p.path}</span>
-                    {checked && (
-                      <span className="page-checkbox-tick" aria-hidden="true">
-                        ✓
-                      </span>
-                    )}
+                    {checked && <span className="page-checkbox-tick" aria-hidden="true">✓</span>}
                   </label>
                 );
               })}
@@ -178,9 +188,33 @@ export default function ComparePage({ onRunComplete }) {
           </div>
         )}
 
+        {/* ── Added / Deleted pages (info only — not selectable) ── */}
+        {fetchState === "done" && (addedPages.length > 0 || deletedPages.length > 0) && (
+          <div className="page-diff-section">
+            <div className="page-diff-section-title">Page Changes Detected</div>
+
+            {addedPages.map((p) => (
+              <div key={p.path} className="page-diff-row page-diff-row-added">
+                <span className="page-diff-badge page-diff-badge-added">Added</span>
+                <span className="page-diff-label">{p.label}</span>
+                <span className="page-diff-path">{p.path}</span>
+              </div>
+            ))}
+
+            {deletedPages.map((p) => (
+              <div key={p.path} className="page-diff-row page-diff-row-deleted">
+                <span className="page-diff-badge page-diff-badge-deleted">Deleted</span>
+                <span className="page-diff-label">{p.label}</span>
+                <span className="page-diff-path">{p.path}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         <hr className="divider" />
 
         <div className="runComparison">
+          {/* ── Resolution selector ── */}
           <div className="resolutionSel">
             <button
               type="button"
@@ -200,8 +234,32 @@ export default function ComparePage({ onRunComplete }) {
             >
               <img className="resIcon" src={mobileLogo} alt="Mobile View" />
             </button>
+            {/* ── Threshold input ── */}
+          <div className="threshold-wrap">
+            <input
+              id="threshold-input"
+              type="number"
+              className="threshold-input"
+              value={threshold}
+              min={0.3}
+              max={0.9}
+              step={0.1}
+              disabled={running}
+              onChange={(e) => {
+                const v = parseFloat(e.target.value);
+                if (!isNaN(v) && v >= 0.3 && v <= 0.9) setThreshold(v);
+              }}
+            />           
           </div>
-          <button className="run-btn" disabled={!canRun} onClick={() => handleRun(activeResolutionSelector)}>
+          </div>
+
+          
+
+          <button
+            className="run-btn"
+            disabled={!canRun}
+            onClick={() => handleRun(activeResolutionSelector)}
+          >
             {running ? (
               <>
                 <span className="btn-mini-spinner btn-mini-spinner-white" />

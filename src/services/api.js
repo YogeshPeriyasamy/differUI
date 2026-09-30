@@ -39,10 +39,10 @@ export async function fetchPages(liveUrl, stagingUrl) {
  * POST /compare-site
  * Backend immediately returns { runId } (HTTP 202) and processes the job async.
  */
-export async function startCompareSite({ siteName, liveBaseUrl, stagingBaseUrl, pages, selectedDisplayResolution }) {
+export async function startCompareSite({ siteName, liveBaseUrl, stagingBaseUrl, pages, selectedDisplayResolution, threshold }) {
   return request("/compare-site", {
     method: "POST",
-    body: JSON.stringify({ siteName, liveBaseUrl, stagingBaseUrl, pages, selectedDisplayResolution }),
+    body: JSON.stringify({ pages, selectedDisplayResolution, threshold }),
   });
 }
 
