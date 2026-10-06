@@ -241,13 +241,13 @@ export default function ComparePage({ onRunComplete }) {
               type="number"
               className="threshold-input"
               value={threshold}
-              min={0.3}
+              min={0.1}
               max={0.9}
               step={0.1}
               disabled={running}
               onChange={(e) => {
                 const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v >= 0.3 && v <= 0.9) setThreshold(v);
+                if (!isNaN(v) && v >= 0.1 && v <= 0.9) setThreshold(v);
               }}
             />           
           </div>

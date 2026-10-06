@@ -16,11 +16,11 @@ export function useCompare({ onRunComplete }) {
   const [urlError, setUrlError] = useState("");
   const [fetchState, setFetchState] = useState("idle"); // idle | loading | done | error
   const [siteKey, setSiteKey] = useState(null);
-  const [pageList, setPageList] = useState([]);           // matched pages
-  const [addedPages, setAddedPages] = useState([]);       // new in staging
-  const [deletedPages, setDeletedPages] = useState([]);   // removed from staging
+  const [pageList, setPageList] = useState([]); // matched pages
+  const [addedPages, setAddedPages] = useState([]); // new in staging
+  const [deletedPages, setDeletedPages] = useState([]); // removed from staging
   const [selectedPages, setSelectedPages] = useState([]);
-  const [threshold, setThreshold] = useState(0.3);
+  const [threshold, setThreshold] = useState(0.1);
 
   // running: is a comparison run in progress?
   const [running, setRunning] = useState(false);
@@ -108,16 +108,16 @@ export function useCompare({ onRunComplete }) {
       // Backend returns { pages: { matchedPages, addedPages, deletedPages } }
       // Derive a display-friendly siteKey from the live URL
       const matched = data.pages?.matchedPages ?? [];
-      const added   = data.pages?.addedPages   ?? [];
-      const deleted = data.pages?.deletedPages  ?? [];
+      const added = data.pages?.addedPages ?? [];
+      const deleted = data.pages?.deletedPages ?? [];
 
       // Normalise matched pages into the { id, label, path, live, staging } shape
       // the rest of the hook/UI expects
       const normalisedPages = matched.map((p) => ({
-        id:      p.path,   // path is unique — use as stable id
-        label:   p.label,
-        path:    p.path,
-        live:    p.live,
+        id: p.path, // path is unique — use as stable id
+        label: p.label,
+        path: p.path,
+        live: p.live,
         staging: p.staging,
       }));
 
@@ -179,35 +179,6 @@ export function useCompare({ onRunComplete }) {
     });
   }
 
-  // function startPolling(runId) {
-  //   stopPolling(); // safety: clear any stale timer
-
-  //   eventSourceRef.current = setInterval(async () => {
-  //     try {
-  //       const snap = await pollRunStatus(runId);
-
-  //       // Mirror backend phase + progress into state so RunningLoader can read it
-  //       setRunProgress({ phase: snap.phase ?? "Running", progress: snap.progress ?? 0 });
-
-  //       if (snap.status === "done") {
-  //         stopPolling();
-  //         setRunProgress({ phase: "Done", progress: 100 });
-  //         setTimeout(() => {
-  //           setRunning(false);
-  //           onRunComplete(snap.result);
-  //         }, 600);
-  //       } else if (snap.status === "error") {
-  //         stopPolling();
-  //         setRunning(false);
-  //         setRunProgress({ phase: "Initialising", progress: 0 });
-  //         alert(`Comparison failed: ${snap.error ?? "Unknown error"}`);
-  //       }
-  //     } catch (err) {
-  //       // Network blip — keep polling; don't abort unless the error is permanent
-  //       console.warn("[useCompare] Poll error (will retry):", err.message);
-  //     }
-  //   }, POLL_INTERVAL_MS);
-  // }
 
   // ── Run comparison ─────────────────────────────────────────────────────────
   const handleRun = useCallback(
@@ -218,18 +189,18 @@ export function useCompare({ onRunComplete }) {
       setRunProgress({ phase: "Initialising", progress: 0 });
 
       try {
-        const activeRunId = localStorage.getItem("activeRunId")
-        console.log("active runId ref...........", );
+        const activeRunId = localStorage.getItem("activeRunId");
+        console.log("active runId ref...........");
         if (activeRunId) {
-          await deleteRun(activeRunId);    
+          await deleteRun(activeRunId);
           localStorage.removeItem("activeRunId");
         }
 
         const { runId } = await startCompareSite({
-          siteName:                  siteKey,
-          liveBaseUrl:               fetchedUrls.current.live,
-          stagingBaseUrl:            fetchedUrls.current.staging,
-          pages:                     selectedPages.map((id) => pageList.find((p) => p.id === id)).filter(Boolean),
+          siteName: siteKey,
+          liveBaseUrl: fetchedUrls.current.live,
+          stagingBaseUrl: fetchedUrls.current.staging,
+          pages: selectedPages.map((id) => pageList.find((p) => p.id === id)).filter(Boolean),
           selectedDisplayResolution: selectedDisplay,
           threshold,
         });
@@ -252,16 +223,32 @@ export function useCompare({ onRunComplete }) {
 
   return {
     // URL fields
-    liveUrl, stagingUrl, urlError,
-    handleLiveChange, handleStagingChange, validateUrls,
+    liveUrl,
+    stagingUrl,
+    urlError,
+    handleLiveChange,
+    handleStagingChange,
+    validateUrls,
     // Fetch
-    fetchState, siteKey, pageList, addedPages, deletedPages,
-    handleFetchPages, canFetch,
+    fetchState,
+    siteKey,
+    pageList,
+    addedPages,
+    deletedPages,
+    handleFetchPages,
+    canFetch,
     // Page selection
-    selectedPages, togglePage, selectAll, clearAll,
+    selectedPages,
+    togglePage,
+    selectAll,
+    clearAll,
     // Threshold
-    threshold, setThreshold,
+    threshold,
+    setThreshold,
     // Run
-    running, runProgress, canRun, handleRun,
+    running,
+    runProgress,
+    canRun,
+    handleRun,
   };
 }

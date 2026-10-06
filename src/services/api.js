@@ -52,7 +52,7 @@ export async function startCompareSite({ siteName, liveBaseUrl, stagingBaseUrl, 
  * Poll this until status === "done" | "error".
  */
 export async function pollRunStatus(runId) {
-  return request(`/compare-site/${encodeURIComponent(runId)}/status`); //encodeURIComponent->"https://example.com/search?name=John Doe" to "https%3A%2F%2Fexample.com%2Fsearch%3Fname%3DJohn%20Doe"
+  return request(`/compare-site/${encodeURIComponent(runId)}/status`); 
 }
 
 export function fetchProgress(runId, { onProgress, onDone, onError }) {
