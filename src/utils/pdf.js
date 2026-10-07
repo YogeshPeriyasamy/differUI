@@ -1,21 +1,6 @@
-/**
- * utils/pdf.js
- * PDF export logic for the diff results page.
- * Isolated here so ResultsPage stays focused on rendering.
- */
-
 import { jsPDF } from "jspdf";
 import { fetchImageAsDataUrl } from "../services/api";
 
-/**
- * Generates and downloads a landscape A4 PDF showing Live / Diff / Staging
- * screenshots for a single page result.
- *
- * @param {object} activePage  - Page result object from the API
- * @param {string} runId
- * @param {string} runDate
- * @param {string} runTime
- */
 export async function downloadPagePdf(activePage, runId, runDate, runTime) {
   const { page: pageName, liveUrl, diffUrl, stagingUrl, livePageUrl, stagingPageUrl, avgMismatchPct = 0 } = activePage;
 
@@ -49,13 +34,23 @@ export async function downloadPagePdf(activePage, runId, runDate, runTime) {
   const colGap = 2;
   const badgeW = 80;
   const badgeH = 18;
-  const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: "a4" });
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const colWidth = (pageWidth - margin * 2 - colGap * 2) / 3;
+  const a4LandscapeWidth = 841.89;
 
+  let headerY = margin;
+  for (const rep of reports) {
+    headerY += rep.fontSize + 2;
+  }
+  headerY += badgeH + 4; // Add space for the badge
+  const headerHeight = headerY + labelHeight; // Total height of the header section
+  // const colWidth = (pageWidth - margin * 2 - colGap * 2) / 3;
+  const colWidth = (a4LandscapeWidth - margin * 2 - colGap * 2) / 3;
   const renderedHeights = images.map(({ width, height }) => height * Math.min(colWidth / Math.max(width, 1), 1));
   const maxImageHeight = Math.max(...renderedHeights);
+  const totalHeight = headerHeight + maxImageHeight + margin; // Total height of the PDF content
+
+  const pdf = new jsPDF({ unit: "px", format: [a4LandscapeWidth, totalHeight] });
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
 
   let y = margin;
 
@@ -85,53 +80,25 @@ export async function downloadPagePdf(activePage, runId, runDate, runTime) {
 
   // ── Image columns ─────────────────────────────────────────────────────────
   const imgAreaTop = y + labelHeight;
-  const firstPageImageHeight = pageHeight - imgAreaTop - margin;
-  const continuationTop = margin + labelHeight;
-  const continuationImageHeight = pageHeight - continuationTop - margin;
-  const pageCount = maxImageHeight <= firstPageImageHeight
-    ? 1
-    : 1 + Math.ceil((maxImageHeight - firstPageImageHeight) / continuationImageHeight);
+  for (let i = 0; i < entries.length; i++) {
+    const { label, color } = entries[i];
+    const { dataUrl, width, height } = images[i];
+    const colX = margin + i * (colWidth + colGap);
 
-  for (let pageIndex = 0; pageIndex < pageCount; pageIndex++) {
-    if (pageIndex > 0) {
-      pdf.addPage("a4", "landscape");
-      y = margin;
+    // draw column label
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(labelFontSz);
+    pdf.setTextColor(...color);
+    pdf.text(label, colX, y + labelHeight - 3.5, { align: "left" });
 
-      for (let i = 0; i < entries.length; i++) {
-        const { label, color } = entries[i];
-        const colX = margin + i * (colWidth + colGap);
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(labelFontSz);
-        pdf.setTextColor(...color);
-        pdf.text(`${label} (continued)`, colX, y + labelHeight - 3.5, { align: "left" });
-      }
-    }
+    // draw image
+    const scale = Math.min(colWidth / Math.max(width, 1), 1);
+    const drawW = width * scale;
+    const drawH = height * scale;
+    const offsetX = colX + (colWidth - drawW) / 2;
+    const fmt = dataUrl.startsWith("data:image/png") ? "PNG" : "JPEG";
 
-    const currentImageTop = pageIndex === 0 ? imgAreaTop : continuationTop;
-    const imageOffset = pageIndex === 0
-      ? 0
-      : firstPageImageHeight + (pageIndex - 1) * continuationImageHeight;
-
-    for (let i = 0; i < entries.length; i++) {
-      const { label, color } = entries[i];
-      const { dataUrl, width, height } = images[i];
-      const colX = margin + i * (colWidth + colGap);
-
-      if (pageIndex === 0) {
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(labelFontSz);
-        pdf.setTextColor(...color);
-        pdf.text(label, colX, y + labelHeight - 3.5, { align: "left" });
-      }
-
-      const scale = Math.min(colWidth / Math.max(width, 1), 1);
-      const drawW = width * scale;
-      const drawH = height * scale;
-      const offsetX = colX + (colWidth - drawW) / 2;
-      const fmt = dataUrl.startsWith("data:image/png") ? "PNG" : "JPEG";
-
-      pdf.addImage(dataUrl, fmt, offsetX, currentImageTop - imageOffset, drawW, drawH);
-    }
+    pdf.addImage(dataUrl, fmt, offsetX, imgAreaTop, drawW, drawH);
   }
 
   const safeFileName = pageName.replace(/[^a-z0-9_-]/gi, "_").toLowerCase();
